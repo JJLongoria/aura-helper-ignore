@@ -1,5 +1,5 @@
 const Ignore = require('../index');
-const { TypesFactory } = require('@ah/core').Types;
+const TypesFactory = require('@ah/metadata-factory');
 const { FileWriter } = require('@ah/core').FileSystem;
 
 describe('Testing ./index.js', () => {
