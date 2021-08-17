@@ -7,7 +7,7 @@ describe('Testing ./index.js', () => {
         try {
             Ignore.ignoreMetadata();
         } catch (error) {
-            expect(error.message).toMatch('Wrong Metadata file path. Expect a JSON file path and receive')
+            expect(error.message).toMatch('You must to provied a Metadata JSON file path or Metadata JSON Object')
         }
         try {
             Ignore.ignoreMetadata('./test/assets/.ahignores.json', './test/assets/.ahignores.json');
@@ -19,23 +19,27 @@ describe('Testing ./index.js', () => {
         } catch (error) {
             expect(error.message).toMatch('does not have a valid JSON content')
         }
-
+        let metadata = TypesFactory.createMetadataTypesFromPackageXML('./test/assets/package.xml');
         try {
             Ignore.ignoreMetadata({});
         } catch (error) {
-            expect(error.message).toMatch('Wrong Ignore file path. Expect a JSON file path and receive')
+            expect(error.message).toMatch('Wrong JSON Format file. The main object has no keys and values')
         }
         try {
-            Ignore.ignoreMetadata({}, './test/assets/.ahignores.json');
+            Ignore.ignoreMetadata(metadata);
+        } catch (error) {
+            expect(error.message).toMatch('Wrong Ignore file path. Expect a file path and receive')
+        }
+        try {
+            Ignore.ignoreMetadata(metadata, './test/assets/.ahignores.json');
         } catch (error) {
             expect(error.message).toMatch('does not exists or not have access to it')
         }
         try {
-            Ignore.ignoreMetadata({}, './test/assets/package.xml');
+            Ignore.ignoreMetadata(metadata, './test/assets/package.xml');
         } catch (error) {
             expect(error.message).toMatch('does not have a valid JSON content')
         }
-        let metadata = TypesFactory.createMetadataTypesFromPackageXML('./test/assets/package.xml');
         // Terting ignore without * without remove
         let result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore.json');
         expect(result['ApexClass'].getChild('AccountProcessor').checked).toBeFalsy();
@@ -170,7 +174,7 @@ describe('Testing ./index.js', () => {
         try {
             Ignore.ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails);
         } catch (error) {
-            expect(error.message).toMatch('Wrong Ignore file path. Expect a JSON file path and receive')
+            expect(error.message).toMatch('Wrong Ignore file path. Expect a file path and receive')
         }
         try {
             Ignore.ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails, './test/assets/.ahignores.json');

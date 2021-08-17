@@ -20,7 +20,16 @@ Class to ignore metadata from your salesforce projects or from a JSON metadata o
 
 # [**Methods**](#ignore-class-methods)
 
-## ignoreMetadata(metadataOrPath, ignorefile, typesToIgnore, remove, progressCallback)
+  - [**ignoreMetadata(metadataOrPath, ignorefile, typesToIgnore, remove, progressCallback)**](#ignoremetadatametadataorpath-ignorefile-typestoignore-remove-progresscallback)
+
+    Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON file. You can choose to uncheck elements or remove it from Metadata JSON.
+
+  - [**ignoreProjectMetadata(projectPath, metadataDetails, ignorefile, options, progressCallback)**](#ignoreprojectmetadataprojectpath-metadatadetails-ignorefile-options-progresscallback)
+
+    Method to ignore Metadata types from your local project. This method can delete some data from XML Files or entire XML files or folders according the ignore file data
+
+---
+## [**ignoreMetadata(metadataOrPath, ignorefile, typesToIgnore, remove, progressCallback)**](#ignoremetadatametadataorpath-ignorefile-typestoignore-remove-progresscallback)
 Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON file. You can choose to uncheck elements or remove it from Metadata JSON. See [Metadata JSON Format](#metadata-file) section to understand the JSON Metadata Format 
 
 ### **Parameters:**
@@ -111,7 +120,7 @@ This method can throw the next exceptions:
     console.log(metadataTypes);
 ---
 
-## ignoreProjectMetadata(projectPath, metadataDetails, ignorefile, options, progressCallback)
+## [**ignoreProjectMetadata(projectPath, metadataDetails, ignorefile, options, progressCallback)**](#ignoreprojectmetadataprojectpath-metadatadetails-ignorefile-options-progresscallback)
 Method to ignore Metadata types from your local project. This method can delete some data from XML Files or entire XML files or folders according the ignore file data
 
 ### **Parameters:**
