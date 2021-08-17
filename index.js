@@ -134,7 +134,8 @@ class Ignore {
      * @throws {WrongFormatException} If metadata file path or ignore file is not a JSON file or Metadata Object are wrong
      */
     static ignoreMetadata(metadataOrPath, ignorefile, typesToIgnore, remove, progressCallback) {
-        const metadata = (Utils.isObject(metadataOrPath)) ? Utils.clone(metadataOrPath) : Validator.validateMetadataJSON(metadataOrPath, 'Metadata');
+        Validator.validateMetadataJSON(metadataOrPath, 'Metadata')
+        const metadata = Utils.clone(metadataOrPath);
         const ignoredMetadata = createIgnoreMetadataMap(Validator.validateJSONFile(ignorefile, 'Ignore'));
         for (const metadataTypeName of Object.keys(ignoredMetadata)) {
             const typeData = TYPES_XML_RELATION[metadataTypeName];
