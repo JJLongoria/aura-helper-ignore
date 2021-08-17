@@ -113,15 +113,33 @@ const METADATA_WITH_CHILDS = {
     ]
 };
 
+/**
+ * Class to ignore metadata from your salesforce projects or from a JSON metadata object. 
+ */
 class Ignore {
 
-    static ignoreMetadata(metadataOrPath, ignorefile, typesForIgnore, remove, progressCallback) {
-        const metadata = (typeof metadataOrPath === 'object') ? Utils.clone(metadataOrPath) : Validator.validateJSONFile(metadataOrPath, 'Metadata');
+    /**
+     * Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON file. You can choose to uncheck elements or remove it from Metadata JSON
+     * @param {String | Object} metadataOrPath Metadata JSON Object or Metadata JSON file path
+     * @param {String} ignorefile Path to the ignore file
+     * @param {Object} typesToIgnore Parameter to ignore metadata. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
+     * @param {Boolean} remove True to remove ignored elements from the result object, false only for unselect elements 
+     * @param {Function} progressCallback Function to handle the ignore progress status
+     *
+     * @returns {Object} Return a Metadata JSON Object with the ignored metadata unselected or removed
+     * 
+     * @throws {WrongFilePathException} If the metadata file path or ignore file path is not a String or can't convert to absolute path
+     * @throws {FileNotFoundException} If the metadata file path or ignore file not exists or not have access to it
+     * @throws {InvalidFilePathException} If the metadata file path or ignore file is not a file
+     * @throws {WrongFormatException} If metadata file path or ignore file is not a JSON file or Metadata Object are wrong
+     */
+    static ignoreMetadata(metadataOrPath, ignorefile, typesToIgnore, remove, progressCallback) {
+        const metadata = (Utils.isObject(metadataOrPath)) ? Utils.clone(metadataOrPath) : Validator.validateMetadataJSON(metadataOrPath, 'Metadata');
         const ignoredMetadata = createIgnoreMetadataMap(Validator.validateJSONFile(ignorefile, 'Ignore'));
         for (const metadataTypeName of Object.keys(ignoredMetadata)) {
             const typeData = TYPES_XML_RELATION[metadataTypeName];
             if (metadata[metadataTypeName] || (typeData && typeData.singularName)) {
-                if (typesForIgnore && !typesForIgnore.includes(metadataTypeName))
+                if (typesToIgnore && !typesToIgnore.includes(metadataTypeName))
                     continue;
                 callProgressCallback(progressCallback, ProgressStages.START_TYPE, metadataTypeName);
                 switch (metadataTypeName) {
@@ -172,12 +190,28 @@ class Ignore {
         return TypesFactory.deserializeMetadataTypes(metadata, true);
     }
 
+    /**
+     * Method to ignore Metadata types from your local project. This method can delete some data from XML Files or entire XML files or folders according the ignore file data
+     * @param {String} projectPath Salesforce Project root path
+     * @param {Array<MetadataDetail>} metadataDetails Metadata details list
+     * @param {String} ignorefile Path to the ignore file
+     * @param {Object} options Options object to choose if compress modified files, compression order and specify types to ignore 
+     * @param {Function} progressCallback Function to handle the ignore progress status
+     * 
+     * @throws {WrongFilePathException} If the ignore file path is not a String or can't convert to absolute path
+     * @throws {FileNotFoundException} If the ignore file not exists or not have access to it
+     * @throws {InvalidFilePathException} If the ignore file is not a file
+     * @throws {WrongFormatException} If ignore file is not a JSON file
+     * @throws {WrongDirectoryPathException} If the project path is not a String or can't convert to absolute path
+     * @throws {DirectoryNotFoundException} If the project path directory not exists or not have access to it
+     * @throws {InvalidDirectoryPathException} If the project path is not a directory
+     */
     static ignoreProjectMetadata(projectPath, metadataDetails, ignorefile, options, progressCallback) {
         if (!options)
             options = {
                 compress: false,
                 sortOrder: undefined,
-                typesForIgnore: undefined
+                typesToIgnore: undefined
             }
         projectPath = Validator.validateFolderPath(projectPath, 'Project');
         const ignoredMetadata = createIgnoreMetadataMap(Validator.validateJSONFile(ignorefile, 'Ignore'));
@@ -187,7 +221,7 @@ class Ignore {
         for (const metadataTypeName of Object.keys(ignoredMetadata)) {
             let typeData = TYPES_XML_RELATION[metadataTypeName];
             if (metadataFromFileSystem[metadataTypeName] || (typeData && typeData.singularName)) {
-                if (options.typesForIgnore && !options.typesForIgnore.includes(metadataTypeName))
+                if (options.typesToIgnore && !options.typesToIgnore.includes(metadataTypeName))
                     continue;
                 callProgressCallback(progressCallback, 'type', metadataTypeName);
                 switch (metadataTypeName) {
