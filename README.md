@@ -3,6 +3,18 @@ Module to ignore metadata from your salesforce projects or from a JSON metadata 
 
 This module is used to [@ah/package-generator](https://github.com/JJLongoria/aura-helper-package-generator) for ignore metadata types when created the package or detructive XML files.
 
+---
+
+## *Table of Contents*
+
+- [**Ignore Class**](#ignore-class)
+
+- [**Metadata JSON Format**](#metadata-json-format)
+  
+- [**Ignore File**](#ignore-file)
+
+---
+
 # [**Ignore Class**](#ignore-class)
 Class to ignore metadata from your salesforce projects or from a JSON metadata object. 
 
