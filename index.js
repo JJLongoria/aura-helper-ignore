@@ -122,9 +122,9 @@ class Ignore {
      * Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON file. You can choose to uncheck elements or remove it from Metadata JSON
      * @param {String | Object} metadataOrPath Metadata JSON Object or Metadata JSON file path
      * @param {String} ignorefile Path to the ignore file
-     * @param {Array<String>?} typesToIgnore List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
-     * @param {Boolean?} remove True to remove ignored elements from the result object, false only for unselect elements 
-     * @param {Function?} progressCallback Function to handle the ignore progress status
+     * @param {Array<String>} [typesToIgnore] List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
+     * @param {Boolean} [remove] True to remove ignored elements from the result object, false only for unselect elements 
+     * @param {Function} [progressCallback] Function to handle the ignore progress status
      *
      * @returns {Object} Return a Metadata JSON Object with the ignored metadata unselected or removed
      * 
@@ -196,8 +196,8 @@ class Ignore {
      * @param {String} projectPath Salesforce Project root path
      * @param {Array<MetadataDetail>} metadataDetails Metadata details list
      * @param {String} ignorefile Path to the ignore file
-     * @param {Object?} options Options object to choose if compress modified files, compression order and specify types to ignore 
-     * @param {Function?} progressCallback Function to handle the ignore progress status
+     * @param {Object} [options] Options object to choose if compress modified files, compression order and specify types to ignore 
+     * @param {Function} [progressCallback] Function to handle the ignore progress status
      * 
      * @throws {WrongFilePathException} If the ignore file path is not a String or can't convert to absolute path
      * @throws {FileNotFoundException} If the ignore file not exists or not have access to it
