@@ -37,8 +37,8 @@ Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON fil
     - String | Object
   - **ignorefile**: Path to the ignore file
     - String
-  - **typesToIgnore**: Parameter to ignore metadata. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
-    - Object
+  - **typesToIgnore**: List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
+    - Array\<String\>
   - **remove**: True to remove ignored elements from the result object, false only for unselect elements 
     - Boolean
   - **progressCallback**: Function to handle the ignore progress status
