@@ -4,44 +4,47 @@ const { FileWriter } = require('@ah/core').FileSystem;
 
 describe('Testing ./index.js', () => {
     test('Testing ignoreMetadata()', () => {
+        new Ignore().setCompress(true).setIgnoreFile('').setSortOrder('').setTypesToIgnore([]).sortAlphabetAsc().sortAlphabetDesc().sortComplexFirst().sortSimpleFirst().removeData(true);
         try {
-            Ignore.ignoreMetadata();
+            new Ignore().ignoreMetadata();
         } catch (error) {
             expect(error.message).toMatch('You must to provied a Metadata JSON file path or Metadata JSON Object')
         }
         try {
-            Ignore.ignoreMetadata('./test/assets/.ahignores.json', './test/assets/.ahignores.json');
+            new Ignore('./test/assets/.ahignores.json').ignoreMetadata('./test/assets/.ahignores.json');
         } catch (error) {
             expect(error.message).toMatch('does not exists or not have access to it')
         }
         try {
-            Ignore.ignoreMetadata('./test/assets/package.xml', './test/assets/package.xml');
+            new Ignore('./test/assets/package.xml').ignoreMetadata('./test/assets/package.xml');
         } catch (error) {
             expect(error.message).toMatch('does not have a valid JSON content')
         }
         let metadata = TypesFactory.createMetadataTypesFromPackageXML('./test/assets/package.xml');
         try {
-            Ignore.ignoreMetadata({});
+            new Ignore('./test/assets/package.xml').ignoreMetadata({
+                data: "",
+            });
         } catch (error) {
-            expect(error.message).toMatch('Wrong JSON Format file. The main object has no keys and values')
+            expect(error.message).toMatch('Wrong JSON Format')
         }
         try {
-            Ignore.ignoreMetadata(metadata);
+            new Ignore().ignoreMetadata(metadata);
         } catch (error) {
             expect(error.message).toMatch('Wrong Ignore file path. Expect a file path and receive')
         }
         try {
-            Ignore.ignoreMetadata(metadata, './test/assets/.ahignores.json');
+            new Ignore('./test/assets/.ahignores.json').ignoreMetadata(metadata);
         } catch (error) {
             expect(error.message).toMatch('does not exists or not have access to it')
         }
         try {
-            Ignore.ignoreMetadata(metadata, './test/assets/package.xml');
+            new Ignore('./test/assets/package.xml').ignoreMetadata(metadata);
         } catch (error) {
             expect(error.message).toMatch('does not have a valid JSON content')
         }
         // Terting ignore without * without remove
-        let result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore.json');
+        let result = new Ignore('./test/assets/.ahignore.json').ignoreMetadata(metadata);
         expect(result['ApexClass'].getChild('AccountProcessor').checked).toBeFalsy();
         expect(result['ApexComponent'].getChild('SiteFooter').checked).toBeFalsy();
         expect(result['ApexPage'].getChild('AnswersHome').checked).toBeFalsy();
@@ -62,13 +65,13 @@ describe('Testing ./index.js', () => {
         expect(result['Report'].getChild('folder2').getChild('report2').checked).toBeFalsy();
 
         // Terting ignore without * and specified types for ignore
-        result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore.json', ['ApexClass', 'ApexComponent', 'ApexPage']);
+        result = new Ignore('./test/assets/.ahignore.json').setTypesToIgnore(['ApexClass', 'ApexComponent', 'ApexPage']).ignoreMetadata(metadata);
         expect(result['ApexClass'].getChild('AccountProcessor').checked).toBeFalsy();
         expect(result['ApexComponent'].getChild('SiteFooter').checked).toBeFalsy();
         expect(result['ApexPage'].getChild('AnswersHome').checked).toBeFalsy();
 
         // Terting ignore without * with remove
-        result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore.json', undefined, true);
+        result = new Ignore('./test/assets/.ahignore.json').removeData(true).ignoreMetadata(metadata);
         expect(result['ApexClass'].getChild('AccountProcessor')).toBeUndefined();
         expect(result['ApexComponent'].getChild('SiteFooter')).toBeUndefined();
         expect(result['ApexPage'].getChild('AnswersHome')).toBeUndefined();
@@ -89,7 +92,7 @@ describe('Testing ./index.js', () => {
         expect(result['Report'].getChild('folder2').getChild('report2')).toBeUndefined();
 
         // Testing ignore with * and without remove
-        result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore2.json');
+        result = new Ignore('./test/assets/.ahignore2.json').ignoreMetadata(metadata);
         expect(result['ApexClass'].getChild('AccountProcessor').checked).toBeFalsy();
         expect(result['ApexComponent'].getChild('SiteFooter').checked).toBeFalsy();
         expect(result['ApexPage'].getChild('AnswersHome').checked).toBeFalsy();
@@ -106,7 +109,7 @@ describe('Testing ./index.js', () => {
         expect(result['Report'].getChild('folder1').getChild('report1').checked).toBeFalsy();
 
         // Testing ignore with * and remove
-        result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore2.json', undefined, true);
+        result = new Ignore('./test/assets/.ahignore2.json').removeData(true).ignoreMetadata(metadata);
         expect(result['ApexClass']).toBeUndefined();
         expect(result['ApexComponent']).toBeUndefined();
         expect(result['ApexPage']).toBeUndefined();
@@ -123,7 +126,7 @@ describe('Testing ./index.js', () => {
         expect(result['Report']).toBeUndefined();
 
         // Testing ignore with *:* and without remove
-        result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore3.json');
+        result = new Ignore('./test/assets/.ahignore3.json').ignoreMetadata(metadata);
         expect(result['ApexClass'].getChild('AccountProcessor').checked).toBeFalsy();
         expect(result['ApexComponent'].getChild('SiteFooter').checked).toBeFalsy();
         expect(result['ApexPage'].getChild('AnswersHome').checked).toBeFalsy();
@@ -139,7 +142,7 @@ describe('Testing ./index.js', () => {
         expect(result['WorkflowAlert'].getChild('Account').getChild('Alert2').checked).toBeFalsy();
 
         // Testing ignore with *:* and remove
-        result = Ignore.ignoreMetadata(metadata, './test/assets/.ahignore3.json', undefined, true);
+        result = new Ignore('./test/assets/.ahignore3.json').removeData(true).ignoreMetadata(metadata);
         expect(result['ApexClass']).toBeUndefined();
         expect(result['ApexComponent']).toBeUndefined();
         expect(result['ApexPage']).toBeUndefined();
@@ -157,56 +160,49 @@ describe('Testing ./index.js', () => {
     test('Testing ignoreProjectMetadata()', () => {
         const metadataDetails = TypesFactory.createMetadataDetails('./test/assets/metadataTypes.json');
         try {
-            Ignore.ignoreProjectMetadata({}, metadataDetails);
+            new Ignore().ignoreProjectMetadata({}, metadataDetails);
         } catch (error) {
             expect(error.message).toMatch('Wrong Project path. Expect a folder path and receive')
         }
         try {
-            Ignore.ignoreProjectMetadata('./test/assets/SFDXProjects', metadataDetails, './test/assets/.ahignores.json');
+            new Ignore('./test/assets/.ahignores.json').ignoreProjectMetadata('./test/assets/SFDXProjects', metadataDetails);
         } catch (error) {
             expect(error.message).toMatch('does not exists or not have access to it')
         }
         try {
-            Ignore.ignoreProjectMetadata('./test/assets/package.xml', metadataDetails, './test/assets/package.xml');
+            new Ignore('./test/assets/package.xml').ignoreProjectMetadata('./test/assets/package.xml', metadataDetails);
         } catch (error) {
             expect(error.message).toMatch('is not a valid directory path')
         }
         try {
-            Ignore.ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails);
+            new Ignore().ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails);
         } catch (error) {
             expect(error.message).toMatch('Wrong Ignore file path. Expect a file path and receive')
         }
         try {
-            Ignore.ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails, './test/assets/.ahignores.json');
+            const ignore = new Ignore('./test/assets/.ahignores.json');
+            ignore.ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails);
         } catch (error) {
             expect(error.message).toMatch('does not exists or not have access to it')
         }
         try {
-            Ignore.ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails, './test/assets/package.xml');
+            new Ignore('./test/assets/package.xml').ignoreProjectMetadata('./test/assets/SFDXProject', metadataDetails);
         } catch (error) {
             expect(error.message).toMatch('does not have a valid JSON content')
         }
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore.json');
+        new Ignore('./test/assets/.ahignore.json').ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore.json', {
-            typesForIgnore: ['ApexClass', 'ApexComponent', 'ApexPage']
-        });
+        new Ignore('./test/assets/.ahignore.json').setTypesToIgnore(['ApexClass', 'ApexComponent', 'ApexPage']).ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore.json', {
-            compress: true
-        });
+        new Ignore('./test/assets/.ahignore.json').setCompress(true).ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore2.json');
+        new Ignore('./test/assets/.ahignore2.json').ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore2.json', {
-            compress: true
-        });
+        new Ignore('./test/assets/.ahignore2.json').setCompress(true).ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore3.json');
+        new Ignore('./test/assets/.ahignore3.json').ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
         FileWriter.copyFolderSync('./test/assets/SFDXProject', './test/assets/SFDXProjectCopy', true);
-        Ignore.ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails, './test/assets/.ahignore3.json', {
-            compress: true
-        });
+        new Ignore('./test/assets/.ahignore3.json').setCompress(true).ignoreProjectMetadata('./test/assets/SFDXProjectCopy', metadataDetails);
     });
 });
