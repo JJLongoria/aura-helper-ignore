@@ -69,47 +69,47 @@ Constructor to instance a new Ignore object. All parameters are optional and you
 
   - [**onStartProcessType(callback)**](#onstartprocesstypecallback)
 
-
+    Method to set the callback function to handle the event Start Process Metadata Type to handle the ignore progress 
 
   - [**onEndProcessType(callback)**](#onendprocesstypecallback)
 
-
+    Method to set the callback function to handle the event End Process Metadata Type to handle the ignore progress
 
   - [**setIgnoreFile(ignoreFile)**](#setignorefileignorefile)
 
-
+    Method to set the ignore file to ignore the metadata types
 
   - [**setTypesToIgnore(typesToIgnore)**](#settypestoignoretypestoignore)
 
-
+    Method to set the Metadata JSON Object or Metadata JSON file path to process
 
   - [**removeData(remove)**](#removedataremove)
 
-
+    Method to set if remove metadata from Metadata Object or only unselect it
 
   - [**setCompress(compress)**](#setcompresscompress)
 
-
+    Method to set if compress the affected XML Files when the ignore project metadata
 
   - [**setSortOrder(sortOrder)**](#setsortordersortorder)
 
-
+    Method to set the sort order for the XML Elements when compress the files
 
   - [**sortSimpleFirst()**](#sortsimplefirst)
 
-
+    Method to set Simple XML Elements first as sort order (simpleFirst)
 
   - [**sortComplexFirst()**](#sortcomplexfirst)
 
-
+    Method to set Complex XML Elements first as sort order (complexFirst)
 
   - [**sortAlphabetAsc()**](#sortalphabetasc)
 
-
+    Method to set Alphabet Asc as sort order (alphabetAsc)
 
   - [**sortAlphabetDesc()**](#sortalphabetdesc)
 
-    
+    Method to set Alphabet Desc as sort order (alphabetDesc)
 
   - [**ignoreMetadata(metadataOrPath)**](#ignoremetadatametadataorpath)
 
@@ -208,7 +208,7 @@ Return the ignore object instance
 Method to set if remove metadata from Metadata Object or only unselect it
 
 ### **Parameters:**
-  - **remove**: True to remove ignored elements from the result object, false only for unselect elements 
+  - **remove**: True to remove ignored elements from the result object, false only for unselect elements. If undefined or not pass parameter, also set to true 
     - Boolean
 
 ### **Return:**
@@ -225,7 +225,7 @@ Return the ignore object instance
 ---
 
 ## [**setCompress(compress)**](#setcompresscompress)
-Method to set if compress the affected XML Files when the ignore project metadata
+True to compress the XML Files, false in otherwise. If undefined or not pass parameter, also set to true.
 
 ### **Parameters:**
   - **compress**: True to compress the XML Files, false in otherwise

@@ -179,34 +179,34 @@ class Ignore {
 
     /**
      * Method to set the Metadata JSON Object or Metadata JSON file path to process
-     * @param {Array<String>} typesToIgnore List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
+     * @param {string | Array<String>} typesToIgnore Metadata type API Name or List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
     setTypesToIgnore(typesToIgnore) {
-        this.typesToIgnore = typesToIgnore;
+        this.typesToIgnore = typesToIgnore ? Utils.forceArray(typesToIgnore) : typesToIgnore;
         return this;
     }
 
     /**
      * Method to set if remove metadata from Metadata Object or only unselect it
-     * @param {Boolean} remove True to remove ignored elements from the result object, false only for unselect elements 
+     * @param {Boolean} remove True to remove ignored elements from the result object, false only for unselect elements. If undefined or not pass parameter, also set to true.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
     removeData(remove) {
-        this.remove = (remove !== undefined && Utils.isBoolean(remove)) ? remove : false;;
+        this.remove = (remove !== undefined && Utils.isBoolean(remove)) ? remove : true;
         return this;
     }
 
     /**
      * Method to set if compress the affected XML Files when the ignore project metadata
-     * @param {Boolean} compress True to compress the XML Files, false in otherwise
+     * @param {Boolean} compress True to compress the XML Files, false in otherwise. If undefined or not pass parameter, also set to true.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
     setCompress(compress) {
-        this.compress = (compress !== undefined && Utils.isBoolean(compress)) ? compress : false;
+        this.compress = (compress !== undefined && Utils.isBoolean(compress)) ? compress : true;
         return this;
     }
 
@@ -354,7 +354,7 @@ class Ignore {
                 switch (metadataTypeName) {
                     case MetadataTypes.CUSTOM_LABELS:
                         if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
-                            ignoreFileCustomLabels(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName], typeData, this.compress, this.sortOrder);
+                            ignoreFileCustomLabels(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName], this.compress, this.sortOrder);
                         break;
                     case MetadataTypes.MATCHING_RULES:
                     case MetadataTypes.ASSIGNMENT_RULES:
