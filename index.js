@@ -178,7 +178,7 @@ class Ignore {
     }
 
     /**
-     * Method to set the Metadata JSON Object or Metadata JSON file path to process
+     * Method to set the Metadata Name or Names to ignore
      * @param {string | Array<String>} typesToIgnore Metadata type API Name or List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
      * 
      * @returns {Ignore} Return the ignore object instance
