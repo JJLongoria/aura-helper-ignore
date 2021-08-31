@@ -240,7 +240,7 @@ Return the ignore object instance
 
     const Ignore = require('@ah/ignore');
     const ignore = new Ignore();
-    ignore.compress(true);
+    ignore.setCompress(true);
 
 ---
 
