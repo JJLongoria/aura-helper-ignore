@@ -81,7 +81,7 @@ Constructor to instance a new Ignore object. All parameters are optional and you
 
   - [**setTypesToIgnore(typesToIgnore)**](#settypestoignoretypestoignore)
 
-    Method to set the Metadata JSON Object or Metadata JSON file path to process
+    Method to set the Metadata Name or Names to ignore
 
   - [**removeData(remove)**](#removedataremove)
 
@@ -185,7 +185,7 @@ Return the ignore object instance
 ---
 
 ## [**setTypesToIgnore(typesToIgnore)**](#settypestoignoretypestoignore)
-Method to set the Metadata JSON Object or Metadata JSON file path to process
+Method to set the Metadata Name or Names to ignore
 
 ### **Parameters:**
   - **typesToIgnore**: List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
