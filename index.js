@@ -225,7 +225,7 @@ class Ignore {
      * Method to set Simple XML Elements first as sort order (simpleFirst)
      * @returns {Ignore} Return the ignore object instance
      */
-     sortSimpleFirst() {
+    sortSimpleFirst() {
         this.sortOrder = SORT_ORDER.SIMPLE_FIRST;
         return this;
     }
@@ -436,9 +436,11 @@ function createIgnoreTypeMap(objectsForIgnore) {
                     objectToIgnoreMap[splits[0]] = [];
                 objectToIgnoreMap[splits[0]].push(splits[1]);
             } else if (splits.length === 3 && splits[0].toLowerCase() === 'userpermission') {
-                if (!objectToIgnoreMap[splits[1]])
-                    objectToIgnoreMap[splits[1]] = [];
-                objectToIgnoreMap[splits[1]].push({ permission: splits[2] });
+                if (!objectToIgnoreMap['userpermission'])
+                    objectToIgnoreMap['userpermission'] = {};
+                if (!objectToIgnoreMap['userpermission'][splits[1]])
+                    objectToIgnoreMap['userpermission'][splits[1]] = [];
+                objectToIgnoreMap['userpermission'][splits[1]].push(splits[2]);
             }
         } else {
             objectToIgnoreMap[objectToIgnore] = [objectToIgnore];
@@ -753,18 +755,6 @@ function ignoreFromPermissionFiles(metadataType, ignoredMetadata, compress, sort
         if (FileChecker.isExists(metadataType.path))
             FileWriter.delete(metadataType.path);
     } else {
-        let permissionsToIgnore = {};
-        Object.keys(ignoredMetadata).forEach(function (ignoredObjectKey) {
-            let ignoredTypes = ignoredMetadata[ignoredObjectKey];
-            for (let ignoredType of ignoredTypes) {
-                if (ignoredType.permission) {
-                    if (!permissionsToIgnore[ignoredObjectKey])
-                        permissionsToIgnore[ignoredObjectKey] = [];
-                    if (!permissionsToIgnore[ignoredObjectKey].includes(ignoredType.permission))
-                        permissionsToIgnore[ignoredObjectKey].push(ignoredType.permission);
-                }
-            }
-        });
         Object.keys(metadataType.childs).forEach(function (objectKey) {
             if (ignoredMetadata[objectKey]) {
                 if (ignoredMetadata[objectKey].includes(objectKey)) {
@@ -774,15 +764,17 @@ function ignoreFromPermissionFiles(metadataType, ignoredMetadata, compress, sort
             }
         });
         Object.keys(metadataType.childs).forEach(function (objectKey) {
-            if (permissionsToIgnore[objectKey] || permissionsToIgnore['*']) {
+            if (ignoredMetadata['userpermission'] && (ignoredMetadata['userpermission'][objectKey] || ignoredMetadata['userpermission']['*'])) {
                 let xmlRoot = XMLParser.parseXML(FileReader.readFileSync(metadataType.childs[objectKey].path), false);
                 if (xmlRoot[metadataType.name] && xmlRoot[metadataType.name].userPermissions) {
                     xmlRoot[metadataType.name].userPermissions = Utils.forceArray(xmlRoot[metadataType.name].userPermissions);
                     let dataToRemove = [];
                     let dataToKeep = [];
                     for (let permission of xmlRoot[metadataType.name].userPermissions) {
-                        if ((permissionsToIgnore[objectKey] && (permissionsToIgnore[objectKey].includes(permission.name) || permissionsToIgnore[objectKey].includes('*'))) || (permissionsToIgnore['*'] && permissionsToIgnore['*'].includes(permission.name))) {
+                        if ((ignoredMetadata['userpermission']['*'] && ignoredMetadata['userpermission']['*'].includes(permission.name)) || (ignoredMetadata['userpermission'][objectKey] && ignoredMetadata['userpermission'][objectKey].includes(permission.name))) {
                             dataToRemove.push(permission);
+                        } else {
+                            dataToKeep.push(permission);
                         }
                     }
                     xmlRoot[metadataType.name].userPermissions = dataToKeep;
