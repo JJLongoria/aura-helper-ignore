@@ -1,6 +1,6 @@
 const Ignore = require('../index');
-const TypesFactory = require('@ah/metadata-factory');
-const { FileWriter } = require('@ah/core').FileSystem;
+const TypesFactory = require('@aurahelper/metadata-factory');
+const { FileWriter } = require('@aurahelper/core').FileSystem;
 
 describe('Testing ./index.js', () => {
     test('Testing ignoreMetadata()', () => {

@@ -1,10 +1,10 @@
 const EventEmitter = require('events').EventEmitter;
-const TypesFactory = require('@ah/metadata-factory');
-const { MetadataTypes } = require('@ah/core').Values;
-const { Utils, Validator } = require('@ah/core').CoreUtils;
-const { XMLParser } = require('@ah/languages').XML;
-const { FileChecker, FileReader, FileWriter, PathUtils } = require('@ah/core').FileSystem;
-const XMLCompressor = require('@ah/xml-compresor');
+const TypesFactory = require('@aurahelper/metadata-factory');
+const { MetadataTypes } = require('@aurahelper/core').Values;
+const { Utils, Validator } = require('@aurahelper/core').CoreUtils;
+const { XMLParser } = require('@aurahelper/languages').XML;
+const { FileChecker, FileReader, FileWriter, PathUtils } = require('@aurahelper/core').FileSystem;
+const XMLCompressor = require('@aurahelper/xml-compressor');
 
 const SORT_ORDER = XMLCompressor.getSortOrderValues();
 
@@ -132,7 +132,7 @@ class Ignore {
 
     /**
      * Constructor to instance a new Ignore object
-     * @param {String} [ignorefile] Path to the ignore file
+     * @param {String} [ignoreFile] Path to the ignore file
      */
     constructor(ignoreFile) {
         this.ignoreFile = ignoreFile;
@@ -195,7 +195,7 @@ class Ignore {
      * @returns {Ignore} Return the ignore object instance
      */
     removeData(remove) {
-        this.remove = (remove !== undefined && Utils.isBoolean(remove)) ? remove : true;
+        this.remove = (Utils.isBoolean(remove)) ? remove : true;
         return this;
     }
 
@@ -206,7 +206,7 @@ class Ignore {
      * @returns {Ignore} Return the ignore object instance
      */
     setCompress(compress) {
-        this.compress = (compress !== undefined && Utils.isBoolean(compress)) ? compress : true;
+        this.compress = (Utils.isBoolean(compress)) ? compress : true;
         return this;
     }
 
