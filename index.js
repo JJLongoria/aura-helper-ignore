@@ -911,6 +911,8 @@ function ignoreFileMetadataFromFiles(metadataType, ignoredMetadata, compress, so
                             let elementKey = xmlElement[typeData.fieldKey]
                             if (ignoredMetadata[objectKey].includes(elementKey)) {
                                 dataToRemove.push(xmlElement);
+                            } else {
+                                dataToKeep.push(xmlElement);
                             }
                         }
                         xmlRoot[typeData.parentName][typeData.collection] = dataToKeep;
@@ -953,6 +955,8 @@ function ignoreFileRules(metadataType, ignoredMetadata, singularType, compress, 
                                         let elementKey = xmlElement[typeData.fieldKey];
                                         if (ignoredMetadata[objectKey] && ignoredMetadata[objectKey].includes(elementKey)) {
                                             dataToRemove.push(xmlElement);
+                                        } else {
+                                            dataToKeep.push(xmlElement);
                                         }
                                     }
                                     xmlRoot[metadataType.name][typeData.collection] = dataToKeep;
@@ -992,6 +996,8 @@ function ignoreFileCustomLabels(metadataType, ignoredMetadata, compress, sortOrd
                     let elementKey = xmlElement[typeData.fieldKey]
                     if (ignoredMetadata[elementKey] && ignoredMetadata[elementKey].includes(elementKey)) {
                         dataToRemove.push(xmlElement);
+                    } else {
+                        dataToKeep.push(xmlElement);
                     }
                 }
                 xmlRoot[metadataType.name][typeData.collection] = dataToKeep;
