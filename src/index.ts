@@ -1,14 +1,15 @@
-const EventEmitter = require('events').EventEmitter;
-const TypesFactory = require('@aurahelper/metadata-factory');
-const { MetadataTypes } = require('@aurahelper/core').Values;
-const { Utils, Validator } = require('@aurahelper/core').CoreUtils;
-const { XMLParser } = require('@aurahelper/languages').XML;
-const { FileChecker, FileReader, FileWriter, PathUtils } = require('@aurahelper/core').FileSystem;
-const XMLCompressor = require('@aurahelper/xml-compressor');
+import EventEmitter from "events";
+import { MetadataFactory } from '@aurahelper/metadata-factory';
+import { XMLCompressor } from '@aurahelper/xml-compressor';
+import { XML } from '@aurahelper/languages';
+import { MetadataTypes, CoreUtils, MetadataType, MetadataDetail, FileChecker, FileWriter, FileReader, PathUtils } from "@aurahelper/core";
+const XMLParser = XML.XMLParser;
+const Utils = CoreUtils.Utils;
+const Validator = CoreUtils.Validator;
 
 const SORT_ORDER = XMLCompressor.getSortOrderValues();
 
-const TYPES_XML_RELATION = {
+const TYPES_XML_RELATION: { [key: string]: any } = {
     AssignmentRules: {
         singularName: MetadataTypes.ASSIGNMENT_RULE,
         collection: 'assignmentRule',
@@ -86,7 +87,7 @@ const TYPES_XML_RELATION = {
     }
 };
 
-const METADATA_WITH_CHILDS = {
+const METADATA_WITH_CHILDS: { [key: string]: any } = {
     Workflow: [
         MetadataTypes.WORKFLOW_ALERT,
         MetadataTypes.WORKFLOW_KNOWLEDGE_PUBLISH,
@@ -115,7 +116,7 @@ const METADATA_WITH_CHILDS = {
     ]
 };
 
-const EVENTS = {
+const EVENTS: { [key: string]: string } = {
     START_TYPE: 'startType',
     END_TYPE: 'endType',
 }
@@ -127,20 +128,25 @@ const EVENTS = {
  * 
  * The setters methods are defined like a builder pattern to make it more usefull
  */
-class Ignore {
+export class Ignore {
 
+    ignoreFile: string;
+    typesToIgnore?: string[];
+    remove: boolean;
+    compress: boolean;
+    sortOrder: string;
+    private _event: EventEmitter;
 
     /**
      * Constructor to instance a new Ignore object
-     * @param {String} [ignoreFile] Path to the ignore file
+     * @param {string} [ignoreFile] Path to the ignore file
      */
-    constructor(ignoreFile) {
+    constructor(ignoreFile: string) {
         this.ignoreFile = ignoreFile;
         this.typesToIgnore = undefined;
         this.remove = false;
         this.compress = false;
-        this.sortOrder = undefined;
-
+        this.sortOrder = SORT_ORDER.ALPHABET_ASC;
         this._event = new EventEmitter();
     }
 
@@ -150,7 +156,7 @@ class Ignore {
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    onStartProcessType(callback) {
+    onStartProcessType(callback: (metadataTypeName: string) => void) {
         this._event.on(EVENTS.START_TYPE, callback);
         return this;
     }
@@ -161,62 +167,62 @@ class Ignore {
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    onEndProcessType(callback) {
+    onEndProcessType(callback: (metadataTypeName: string) => void) {
         this._event.on(EVENTS.END_TYPE, callback);
         return this;
     }
 
     /**
      * Method to set the ignore file to ignore the metadata types
-     * @param {String} ignorefile Path to the ignore file
+     * @param {string} ignorefile Path to the ignore file
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    setIgnoreFile(ignoreFile) {
+    setIgnoreFile(ignoreFile: string): Ignore {
         this.ignoreFile = ignoreFile;
         return this;
     }
 
     /**
      * Method to set the Metadata Name or Names to ignore
-     * @param {string | Array<String>} typesToIgnore Metadata type API Name or List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
+     * @param {string | string[]} typesToIgnore Metadata type API Name or List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    setTypesToIgnore(typesToIgnore) {
-        this.typesToIgnore = typesToIgnore ? Utils.forceArray(typesToIgnore) : typesToIgnore;
+    setTypesToIgnore(typesToIgnore: string | string[]): Ignore {
+        this.typesToIgnore = Utils.forceArray(typesToIgnore) as string[];
         return this;
     }
 
     /**
      * Method to set if remove metadata from Metadata Object or only unselect it
-     * @param {Boolean} remove True to remove ignored elements from the result object, false only for unselect elements. If undefined or not pass parameter, also set to true.
+     * @param {boolean} remove True to remove ignored elements from the result object, false only for unselect elements. If undefined or not pass parameter, also set to true.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    removeData(remove) {
+    removeData(remove: boolean): Ignore {
         this.remove = (Utils.isBoolean(remove)) ? remove : true;
         return this;
     }
 
     /**
      * Method to set if compress the affected XML Files when the ignore project metadata
-     * @param {Boolean} compress True to compress the XML Files, false in otherwise. If undefined or not pass parameter, also set to true.
+     * @param {boolean} compress True to compress the XML Files, false in otherwise. If undefined or not pass parameter, also set to true.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    setCompress(compress) {
+    setCompress(compress: boolean): Ignore {
         this.compress = (Utils.isBoolean(compress)) ? compress : true;
         return this;
     }
 
     /**
      * Method to set the sort order for the XML Elements when compress the files
-     * @param {String} sortOrder Sort order to order the XML elements. Values: simpleFirst, complexFirst, alphabetAsc or alphabetDesc. (alphabetDesc by default)
+     * @param {string} sortOrder Sort order to order the XML elements. Values: simpleFirst, complexFirst, alphabetAsc or alphabetDesc. (alphabetDesc by default)
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    setSortOrder(sortOrder) {
+    setSortOrder(sortOrder: string): Ignore {
         this.sortOrder = sortOrder;
         return this;
     }
@@ -225,7 +231,7 @@ class Ignore {
      * Method to set Simple XML Elements first as sort order (simpleFirst)
      * @returns {Ignore} Return the ignore object instance
      */
-    sortSimpleFirst() {
+    sortSimpleFirst(): Ignore {
         this.sortOrder = SORT_ORDER.SIMPLE_FIRST;
         return this;
     }
@@ -234,7 +240,7 @@ class Ignore {
      * Method to set Complex XML Elements first as sort order (complexFirst)
      * @returns {Ignore} Return the ignore object instance
      */
-    sortComplexFirst() {
+    sortComplexFirst(): Ignore {
         this.sortOrder = SORT_ORDER.COMPLEX_FIRST;
         return this;
     }
@@ -243,7 +249,7 @@ class Ignore {
      * Method to set Alphabet Asc as sort order (alphabetAsc)
      * @returns {Ignore} Return the ignore object instance
      */
-    sortAlphabetAsc() {
+    sortAlphabetAsc(): Ignore {
         this.sortOrder = SORT_ORDER.ALPHABET_ASC;
         return this;
     }
@@ -252,23 +258,23 @@ class Ignore {
      * Method to set Alphabet Desc as sort order (alphabetDesc)
      * @returns {Ignore} Return the ignore object instance
      */
-    sortAlphabetDesc() {
+    sortAlphabetDesc(): Ignore {
         this.sortOrder = SORT_ORDER.ALPHABET_DESC;
         return this;
     }
 
     /**
      * Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON file. If You choose removeData option, the metadata will be deleted from the result object, in other only will be unselected
-     * @param {String | Object} metadataOrPath Metadata JSON Object or Metadata JSON file path. You can pass an object or file to process, or process the Ignore metadata Or path setted on object
+     * @param {string | { [key: string]: MetadataType }} metadataOrPath Metadata JSON Object or Metadata JSON file path. You can pass an object or file to process, or process the Ignore metadata Or path setted on object
      * 
-     * @returns {Object} Return a Metadata JSON Object with the ignored metadata unselected or removed
+     * @returns {{ [key: string]: MetadataType }} Return a Metadata JSON Object with the ignored metadata unselected or removed
      * 
      * @throws {WrongFilePathException} If the metadata file path or ignore file path is not a String or can't convert to absolute path
      * @throws {FileNotFoundException} If the metadata file path or ignore file not exists or not have access to it
      * @throws {InvalidFilePathException} If the metadata file path or ignore file is not a file
      * @throws {WrongFormatException} If metadata file path or ignore file is not a JSON file or Metadata Object are wrong
      */
-    ignoreMetadata(metadataOrPath) {
+    ignoreMetadata(metadataOrPath: string | { [key: string]: MetadataType }): { [key: string]: MetadataType } {
         metadataOrPath = Validator.validateMetadataJSON(metadataOrPath)
         const metadata = Utils.clone(metadataOrPath);
         const ignoredMetadata = createIgnoreMetadataMap(Validator.validateJSONFile(this.ignoreFile, 'Ignore'));
@@ -323,13 +329,13 @@ class Ignore {
                 this._event.emit(EVENTS.END_TYPE, metadataTypeName);
             }
         }
-        return TypesFactory.deserializeMetadataTypes(metadata, true);
+        return MetadataFactory.deserializeMetadataTypes(metadata, true);
     }
 
     /**
      * Method to ignore Metadata types from your local project. This method can delete some data from XML Files or entire XML files or folders according the ignore file data
-     * @param {String} projectPath Salesforce Project root path
-     * @param {Array<MetadataDetail>} metadataDetails Metadata details list
+     * @param {string} projectPath Salesforce Project root path
+     * @param {MetadataDetail[]} metadataDetails Metadata details list
      * 
      * @throws {WrongFilePathException} If the ignore file path is not a String or can't convert to absolute path
      * @throws {FileNotFoundException} If the ignore file not exists or not have access to it
@@ -339,12 +345,12 @@ class Ignore {
      * @throws {DirectoryNotFoundException} If the project path directory not exists or not have access to it
      * @throws {InvalidDirectoryPathException} If the project path is not a directory
      */
-    ignoreProjectMetadata(projectPath, metadataDetails) {
+    ignoreProjectMetadata(projectPath: string, metadataDetails: MetadataDetail[]): void {
         projectPath = Validator.validateFolderPath(projectPath, 'Project');
         const ignoredMetadata = createIgnoreMetadataMap(Validator.validateJSONFile(this.ignoreFile, 'Ignore'));
-        metadataDetails = TypesFactory.createMetadataDetails(metadataDetails);
-        const folderMetadataMap = TypesFactory.createFolderMetadataMap(metadataDetails);
-        const metadataFromFileSystem = TypesFactory.createMetadataTypesFromFileSystem(folderMetadataMap, projectPath);
+        metadataDetails = MetadataFactory.createMetadataDetails(metadataDetails);
+        const folderMetadataMap = MetadataFactory.createFolderMetadataMap(metadataDetails);
+        const metadataFromFileSystem = MetadataFactory.createMetadataTypesFromFileSystem(folderMetadataMap, projectPath);
         for (const metadataTypeName of Object.keys(ignoredMetadata)) {
             let typeData = TYPES_XML_RELATION[metadataTypeName];
             if (metadataFromFileSystem[metadataTypeName] || (typeData && typeData.singularName)) {
@@ -416,18 +422,18 @@ class Ignore {
     }
 
 }
-module.exports = Ignore;
 
-function createIgnoreMetadataMap(ignoredMetadata) {
-    const ignoreMetadataMap = {};
+
+function createIgnoreMetadataMap(ignoredMetadata: { [key: string]: string[] }): { [key: string]: any } {
+    const ignoreMetadataMap: { [key: string]: any } = {};
     for (const metadataTypeName of Object.keys(ignoredMetadata)) {
         ignoreMetadataMap[metadataTypeName] = createIgnoreTypeMap(ignoredMetadata[metadataTypeName]);
     }
     return ignoreMetadataMap;
 }
 
-function createIgnoreTypeMap(objectsForIgnore) {
-    let objectToIgnoreMap = {};
+function createIgnoreTypeMap(objectsForIgnore: string[]): { [key: string]: any } {
+    let objectToIgnoreMap: { [key: string]: any } = {};
     for (let objectToIgnore of objectsForIgnore) {
         if (objectToIgnore.indexOf(':') !== -1) {
             let splits = objectToIgnore.split(':');
@@ -449,21 +455,22 @@ function createIgnoreTypeMap(objectsForIgnore) {
     return objectToIgnoreMap;
 }
 
-function ignoreMetadataCustomLabels(metadataType, ignoredMetadata, singularType, remove) {
+function ignoreMetadataCustomLabels(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, singularType: MetadataType, remove: boolean): void {
     if (ignoredMetadata['*']) {
         if (metadataType) {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
-                if (remove)
+            Object.keys(metadataType.childs).forEach((objectKey) => {
+                if (remove) {
                     delete metadataType.childs[objectKey];
-                else
+                } else {
                     metadataType.childs[objectKey].checked = false;
+                }
             });
         }
     }
     if (singularType) {
         let dataToRemove = [];
         let dataToKeep = [];
-        Object.keys(singularType.childs).forEach(function (objectKey) {
+        Object.keys(singularType.childs).forEach((objectKey) => {
             if (ignoredMetadata['*'] || (ignoredMetadata[objectKey] && ignoredMetadata[objectKey].includes(objectKey))) {
                 if (remove) {
                     delete singularType.childs[objectKey];
@@ -477,22 +484,23 @@ function ignoreMetadataCustomLabels(metadataType, ignoredMetadata, singularType,
         });
         if (dataToRemove.length > 0) {
             if (metadataType) {
-                Object.keys(metadataType.childs).forEach(function (objectKey) {
-                    if (remove)
+                Object.keys(metadataType.childs).forEach((objectKey) => {
+                    if (remove) {
                         delete metadataType.childs[objectKey];
-                    else
+                    } else {
                         metadataType.childs[objectKey].checked = false;
+                    }
                 });
             }
         }
     }
 }
 
-function ignoreMetadataRules(metadataType, ignoredMetadata, singularType, remove) {
+function ignoreMetadataRules(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, singularType: MetadataType, remove: boolean): void {
     if (ignoredMetadata['*']) {
         if (metadataType) {
             metadataType.checked = false;
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (remove)
                     delete metadataType.childs[objectKey];
                 else
@@ -502,9 +510,9 @@ function ignoreMetadataRules(metadataType, ignoredMetadata, singularType, remove
     }
     if (singularType) {
         let dataToRemove = [];
-        Object.keys(singularType.childs).forEach(function (objectKey) {
+        Object.keys(singularType.childs).forEach((objectKey) => {
             if (singularType.childs[objectKey].childs && Object.keys(singularType.childs[objectKey].childs).length > 0) {
-                Object.keys(singularType.childs[objectKey].childs).forEach(function (itemKey) {
+                Object.keys(singularType.childs[objectKey].childs).forEach((itemKey) => {
                     if (ignoredMetadata['*'] || (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*')))) {
                         if (remove) {
                             delete singularType.childs[objectKey].childs[itemKey];
@@ -529,7 +537,7 @@ function ignoreMetadataRules(metadataType, ignoredMetadata, singularType, remove
         });
         if (dataToRemove.length > 0) {
             if (metadataType) {
-                Object.keys(metadataType.childs).forEach(function (objectKey) {
+                Object.keys(metadataType.childs).forEach((objectKey) => {
                     if (remove)
                         delete metadataType.childs[objectKey];
                     else
@@ -540,10 +548,10 @@ function ignoreMetadataRules(metadataType, ignoredMetadata, singularType, remove
     }
 }
 
-function ignoreMetadataWithChilds(metadataType, ignoredMetadata, allTypes, remove) {
+function ignoreMetadataWithChilds(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, allTypes: { [key: string]: MetadataType }, remove: boolean): void {
     if (METADATA_WITH_CHILDS[metadataType.name]) {
         if (ignoredMetadata['*']) {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (remove)
                     delete metadataType.childs[objectKey];
                 else
@@ -551,13 +559,13 @@ function ignoreMetadataWithChilds(metadataType, ignoredMetadata, allTypes, remov
             });
             for (let childType of METADATA_WITH_CHILDS[metadataType.name]) {
                 if (allTypes[childType]) {
-                    Object.keys(allTypes[childType].childs).forEach(function (objectKey) {
+                    Object.keys(allTypes[childType].childs).forEach((objectKey) => {
                         if (allTypes[childType] && allTypes[childType].childs[objectKey]) {
                             if (remove) {
                                 delete allTypes[childType].childs[objectKey];
                             } else {
                                 allTypes[childType].childs[objectKey].checked = false;
-                                Object.keys(allTypes[childType].childs[objectKey].childs).forEach(function (itemKey) {
+                                Object.keys(allTypes[childType].childs[objectKey].childs).forEach((itemKey) => {
                                     allTypes[childType].childs[objectKey].childs[itemKey].checked = false;
                                 });
                             }
@@ -566,7 +574,7 @@ function ignoreMetadataWithChilds(metadataType, ignoredMetadata, allTypes, remov
                 }
             }
         } else {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(objectKey) || ignoredMetadata[objectKey].includes('*'))) {
                     if (remove) {
                         delete metadataType.childs[objectKey];
@@ -575,7 +583,7 @@ function ignoreMetadataWithChilds(metadataType, ignoredMetadata, allTypes, remov
                     }
                     for (let childType of METADATA_WITH_CHILDS[metadataType.name]) {
                         if (allTypes[childType] && allTypes[childType].childs[objectKey]) {
-                            Object.keys(allTypes[childType].childs[objectKey].childs).forEach(function (itemKey) {
+                            Object.keys(allTypes[childType].childs[objectKey].childs).forEach((itemKey) => {
                                 if (remove) {
                                     delete allTypes[childType].childs[objectKey].childs[itemKey];
                                 } else {
@@ -589,20 +597,20 @@ function ignoreMetadataWithChilds(metadataType, ignoredMetadata, allTypes, remov
         }
     } else {
         if (ignoredMetadata['*']) {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (remove) {
                     delete metadataType.childs[objectKey];
                 } else {
                     metadataType.childs[objectKey].checked = false;
-                    Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+                    Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                         metadataType.childs[objectKey].childs[itemKey].checked = false;
                     });
                 }
             });
         } else {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 let removeData = [];
-                Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+                Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                     if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*'))) {
                         if (remove) {
                             delete metadataType.childs[objectKey].childs[itemKey];
@@ -618,10 +626,10 @@ function ignoreMetadataWithChilds(metadataType, ignoredMetadata, allTypes, remov
     }
 }
 
-function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes, remove) {
+function ignoreMetadataFromCustomObjects(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, allTypes: { [key: string]: MetadataType }, remove: boolean): void {
     if (METADATA_WITH_CHILDS[metadataType.name]) {
         if (ignoredMetadata['*'] && ignoredMetadata['*'].includes('*')) {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (remove) {
                     delete metadataType.childs[objectKey];
                 } else {
@@ -630,12 +638,12 @@ function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes
             });
             for (let childType of METADATA_WITH_CHILDS[metadataType.name]) {
                 if (allTypes[childType]) {
-                    Object.keys(allTypes[childType].childs).forEach(function (objectKey) {
+                    Object.keys(allTypes[childType].childs).forEach((objectKey) => {
                         if (remove) {
                             delete allTypes[childType].childs[objectKey];
                         } else {
                             allTypes[childType].childs[objectKey].checked = false;
-                            Object.keys(allTypes[childType].childs[objectKey].childs).forEach(function (itemKey) {
+                            Object.keys(allTypes[childType].childs[objectKey].childs).forEach((itemKey) => {
                                 allTypes[childType].childs[objectKey].childs[itemKey].checked = false;
                             });
                         }
@@ -643,7 +651,7 @@ function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes
                 }
             }
         } else if (ignoredMetadata['*']) {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (remove) {
                     delete metadataType.childs[objectKey];
                 } else {
@@ -651,7 +659,7 @@ function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes
                 }
             });
         } else {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(objectKey) || ignoredMetadata[objectKey].includes('*'))) {
                     if (remove) {
                         delete metadataType.childs[objectKey];
@@ -661,7 +669,7 @@ function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes
                     if (ignoredMetadata[objectKey].includes('*')) {
                         for (let childType of METADATA_WITH_CHILDS[metadataType.name]) {
                             if (allTypes[childType] && allTypes[childType].childs[objectKey]) {
-                                Object.keys(allTypes[childType].childs[objectKey].childs).forEach(function (itemKey) {
+                                Object.keys(allTypes[childType].childs[objectKey].childs).forEach((itemKey) => {
                                     if (remove) {
                                         delete allTypes[childType].childs[objectKey].childs[itemKey];
                                     } else {
@@ -676,19 +684,19 @@ function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes
         }
     } else {
         if (ignoredMetadata['*']) {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
                 if (remove) {
                     delete metadataType.childs[objectKey];
                 } else {
                     metadataType.childs[objectKey].checked = false;
-                    Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+                    Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                         metadataType.childs[objectKey].childs[itemKey].checked = false;
                     });
                 }
             });
         } else {
-            Object.keys(metadataType.childs).forEach(function (objectKey) {
-                Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+            Object.keys(metadataType.childs).forEach((objectKey) => {
+                Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                     if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*'))) {
                         if (remove) {
                             delete metadataType.childs[objectKey].childs[itemKey];
@@ -703,20 +711,20 @@ function ignoreMetadataFromCustomObjects(metadataType, ignoredMetadata, allTypes
     }
 }
 
-function ignoreOtherMetadataTypes(metadataType, ignoredMetadata, remove) {
+function ignoreOtherMetadataTypes(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, remove: boolean): void {
     if (ignoredMetadata['*']) {
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
+        Object.keys(metadataType.childs).forEach((objectKey) => {
             if (remove) {
                 delete metadataType.childs[objectKey];
             } else {
                 metadataType.childs[objectKey].checked = false;
-                Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+                Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                     metadataType.childs[objectKey].childs[itemKey].checked = false;
                 });
             }
         });
     } else {
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
+        Object.keys(metadataType.childs).forEach((objectKey) => {
             if (ignoredMetadata[objectKey]) {
                 if (ignoredMetadata[objectKey].includes('*') || ignoredMetadata[objectKey].includes(objectKey)) {
                     if (remove && (!metadataType.childs[objectKey].childs || Object.keys(metadataType.childs[objectKey].childs).length === 0)) {
@@ -724,7 +732,7 @@ function ignoreOtherMetadataTypes(metadataType, ignoredMetadata, remove) {
                     } else {
                         if (!metadataType.childs[objectKey].childs || Object.keys(metadataType.childs[objectKey].childs).length === 0)
                             metadataType.childs[objectKey].checked = false;
-                        Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+                        Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                             if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*'))) {
                                 if (remove) {
                                     delete metadataType.childs[objectKey].childs[itemKey];
@@ -735,7 +743,7 @@ function ignoreOtherMetadataTypes(metadataType, ignoredMetadata, remove) {
                         });
                     }
                 } else {
-                    Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
+                    Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                         if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*'))) {
                             if (remove) {
                                 delete metadataType.childs[objectKey].childs[itemKey];
@@ -750,22 +758,26 @@ function ignoreOtherMetadataTypes(metadataType, ignoredMetadata, remove) {
     }
 }
 
-function ignoreFromPermissionFiles(metadataType, ignoredMetadata, compress, sortOrder) {
+function ignoreFromPermissionFiles(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, compress: boolean, sortOrder: string): void {
     if (ignoredMetadata['*']) {
-        if (FileChecker.isExists(metadataType.path))
+        if (metadataType.path && FileChecker.isExists(metadataType.path)) {
             FileWriter.delete(metadataType.path);
+        }
     } else {
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
+        Object.keys(metadataType.childs).forEach((objectKey) => {
             if (ignoredMetadata[objectKey]) {
                 if (ignoredMetadata[objectKey].includes(objectKey)) {
-                    if (FileChecker.isExists(metadataType.childs[objectKey].path))
-                        FileWriter.delete(metadataType.childs[objectKey].path);
+                    const metadataObject = metadataType.getChild(objectKey);
+                    if (metadataObject && metadataObject.path && FileChecker.isExists(metadataObject.path)) {
+                        FileWriter.delete(metadataObject.path);
+                    }
                 }
             }
         });
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
-            if (ignoredMetadata['userpermission'] && (ignoredMetadata['userpermission'][objectKey] || ignoredMetadata['userpermission']['*'])) {
-                let xmlRoot = XMLParser.parseXML(FileReader.readFileSync(metadataType.childs[objectKey].path), false);
+        Object.keys(metadataType.childs).forEach((objectKey) => {
+            const metadataObject = metadataType.getChild(objectKey);
+            if (metadataObject && metadataObject.path && ignoredMetadata['userpermission'] && (ignoredMetadata['userpermission'][objectKey] || ignoredMetadata['userpermission']['*'])) {
+                let xmlRoot = XMLParser.parseXML(FileReader.readFileSync(metadataObject.path), false);
                 if (xmlRoot[metadataType.name] && xmlRoot[metadataType.name].userPermissions) {
                     xmlRoot[metadataType.name].userPermissions = Utils.forceArray(xmlRoot[metadataType.name].userPermissions);
                     let dataToRemove = [];
@@ -785,7 +797,7 @@ function ignoreFromPermissionFiles(metadataType, ignoredMetadata, compress, sort
                         } else {
                             content = XMLParser.toXML(xmlRoot);
                         }
-                        FileWriter.createFileSync(metadataType.childs[objectKey].path, content);
+                        FileWriter.createFileSync(metadataObject.path, content);
                     }
                 }
             }
@@ -793,23 +805,28 @@ function ignoreFromPermissionFiles(metadataType, ignoredMetadata, compress, sort
     }
 }
 
-function ignoreFileCustomObjects(metadataType, ignoredMetadata) {
+function ignoreFileCustomObjects(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }): void {
     if (ignoredMetadata['*'] && ignoredMetadata['*'].includes('*')) {
-        if (FileChecker.isExists(metadataType.path))
+        if (metadataType.path && FileChecker.isExists(metadataType.path)) {
             FileWriter.delete(metadataType.path);
+        }
     } else {
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
-            if (ignoredMetadata[objectKey]) {
+        Object.keys(metadataType.childs).forEach((objectKey) => {
+            const metadataObject = metadataType.getChild(objectKey);
+            if (ignoredMetadata[objectKey] && metadataObject && metadataObject.path) {
                 if (ignoredMetadata[objectKey].includes(objectKey) || ignoredMetadata['*']) {
-                    if (FileChecker.isExists(metadataType.childs[objectKey].path))
-                        FileWriter.delete(metadataType.childs[objectKey].path);
-                    let metaFile = metadataType.childs[objectKey].path + '-meta.xml';
-                    if (FileChecker.isExists(metaFile))
+                    if (FileChecker.isExists(metadataObject.path)) {
+                        FileWriter.delete(metadataObject.path);
+                    }
+                    let metaFile = metadataObject.path + '-meta.xml';
+                    if (FileChecker.isExists(metaFile)) {
                         FileWriter.delete(metaFile);
+                    }
                 } else if (ignoredMetadata[objectKey].includes('*')) {
-                    let folder = PathUtils.getDirname(metadataType.childs[objectKey].path);
-                    if (FileChecker.isExists(folder))
+                    let folder = PathUtils.getDirname(metadataObject.path);
+                    if (FileChecker.isExists(folder)) {
                         FileWriter.delete(folder);
+                    }
 
                 }
             }
@@ -817,46 +834,60 @@ function ignoreFileCustomObjects(metadataType, ignoredMetadata) {
     }
 }
 
-function ignoreFileFromCustomObjects(metadataType, ignoredMetadata) {
-    Object.keys(metadataType.childs).forEach(function (objectKey) {
-        if (ignoredMetadata['*'] || (ignoredMetadata[objectKey] && ignoredMetadata[objectKey].includes('*'))) {
-            if (FileChecker.isExists(metadataType.childs[objectKey].path))
-                FileWriter.delete(metadataType.childs[objectKey].path);
-        } else if (ignoredMetadata[objectKey]) {
-            Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
-                if (ignoredMetadata[objectKey].includes(itemKey)) {
-                    if (FileChecker.isExists(metadataType.childs[objectKey].childs[itemKey].path))
-                        FileWriter.delete(metadataType.childs[objectKey].childs[itemKey].path);
+function ignoreFileFromCustomObjects(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }): void {
+    Object.keys(metadataType.childs).forEach((objectKey) => {
+        const metadataObject = metadataType.getChild(objectKey);
+        if (metadataObject) {
+            if (ignoredMetadata['*'] || (ignoredMetadata[objectKey] && ignoredMetadata[objectKey].includes('*'))) {
+                if (metadataObject.path && FileChecker.isExists(metadataObject.path)) {
+                    FileWriter.delete(metadataObject.path);
                 }
-            });
+            } else if (ignoredMetadata[objectKey]) {
+                Object.keys(metadataObject.getChilds()).forEach((itemKey) => {
+                    const metadataItem = metadataObject.getChild(itemKey);
+                    if (ignoredMetadata[objectKey].includes(itemKey) && metadataItem && metadataItem.path) {
+                        if (FileChecker.isExists(metadataItem.path)) {
+                            FileWriter.delete(metadataItem.path);
+                        }
+                    }
+                });
+            }
         }
     });
 }
 
-function ignoreMetadataFiles(metadataType, ignoredMetadata) {
+function ignoreMetadataFiles(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }): void {
     if (ignoredMetadata['*']) {
-        if (FileChecker.isExists(metadataType.path))
+        if (metadataType.path && FileChecker.isExists(metadataType.path)) {
             FileWriter.delete(metadataType.path);
+        }
     } else {
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
+        Object.keys(metadataType.childs).forEach((objectKey) => {
             if (ignoredMetadata[objectKey]) {
-                if (metadataType.childs[objectKey].childs && Object.keys(metadataType.childs[objectKey].childs).length > 0) {
-                    Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
-                        if (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*')) {
-                            if (FileChecker.isExists(metadataType.childs[objectKey].childs[itemKey].path))
-                                FileWriter.delete(metadataType.childs[objectKey].childs[itemKey].path);
-                            let metaFile = metadataType.childs[objectKey].childs[itemKey].path + '-meta.xml';
+                const metadataObject = metadataType.getChild(objectKey);
+                if (metadataObject) {
+                    if (metadataObject.hasChilds()) {
+                        Object.keys(metadataObject.getChilds()).forEach((itemKey) => {
+                            const metadataItem = metadataObject.getChild(itemKey);
+                            if (metadataItem && metadataItem.path && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*'))) {
+                                if (FileChecker.isExists(metadataItem.path)) {
+                                    FileWriter.delete(metadataItem.path);
+                                }
+                                let metaFile = metadataItem.path + '-meta.xml';
+                                if (FileChecker.isExists(metaFile)) {
+                                    FileWriter.delete(metaFile);
+                                }
+                            }
+                        });
+                    } else {
+                        if (metadataObject.path && (ignoredMetadata[objectKey].includes(objectKey) || ignoredMetadata[objectKey].includes('*'))) {
+                            if (FileChecker.isExists(metadataObject.path)) {
+                                FileWriter.delete(metadataObject.path);
+                            }
+                            let metaFile = metadataObject.path + '-meta.xml';
                             if (FileChecker.isExists(metaFile))
                                 FileWriter.delete(metaFile);
                         }
-                    });
-                } else {
-                    if (ignoredMetadata[objectKey].includes(objectKey) || ignoredMetadata[objectKey].includes('*')) {
-                        if (FileChecker.isExists(metadataType.childs[objectKey].path))
-                            FileWriter.delete(metadataType.childs[objectKey].path);
-                        let metaFile = metadataType.childs[objectKey].path + '-meta.xml';
-                        if (FileChecker.isExists(metaFile))
-                            FileWriter.delete(metaFile);
                     }
                 }
             }
@@ -864,27 +895,34 @@ function ignoreMetadataFiles(metadataType, ignoredMetadata) {
     }
 }
 
-function ignoreFileMetadataFromFolders(metadataType, ignoredMetadata) {
+function ignoreFileMetadataFromFolders(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }): void {
     if (ignoredMetadata['*']) {
-        if (FileChecker.isExists(metadataType.path))
+        if (metadataType.path && FileChecker.isExists(metadataType.path)) {
             FileWriter.delete(metadataType.path);
+        }
     } else {
-        Object.keys(metadataType.childs).forEach(function (objectKey) {
-            if (ignoredMetadata[objectKey]) {
-                if (ignoredMetadata[objectKey].includes('*')) {
-                    if (FileChecker.isExists(metadataType.childs[objectKey].path))
-                        FileWriter.delete(metadataType.childs[objectKey].path);
-                    let metaFile = metadataType.childs[objectKey].path + '.' + metadataType.suffix + 'Folder-meta.xml';
-                    if (FileChecker.isExists(metaFile))
+        Object.keys(metadataType.childs).forEach((objectKey) => {
+            const metadataObject = metadataType.getChild(objectKey);
+            if (metadataObject && ignoredMetadata[objectKey]) {
+                if (metadataObject.path && ignoredMetadata[objectKey].includes('*')) {
+                    if (FileChecker.isExists(metadataObject.path)) {
+                        FileWriter.delete(metadataObject.path);
+                    }
+                    let metaFile = metadataObject.path + '.' + metadataType.suffix + 'Folder-meta.xml';
+                    if (FileChecker.isExists(metaFile)) {
                         FileWriter.delete(metaFile);
+                    }
                 } else {
-                    Object.keys(metadataType.childs[objectKey].childs).forEach(function (itemKey) {
-                        if (ignoredMetadata[objectKey].includes(itemKey)) {
-                            if (FileChecker.isExists(metadataType.childs[objectKey].childs[itemKey].path))
-                                FileWriter.delete(metadataType.childs[objectKey].childs[itemKey].path);
-                            let metaFile = metadataType.childs[objectKey].childs[itemKey].path + '-meta.xml';
-                            if (FileChecker.isExists(metaFile))
+                    Object.keys(metadataObject.getChilds()).forEach((itemKey) => {
+                        const metadataItem = metadataObject.getChild(itemKey);
+                        if (metadataItem && metadataItem.path && ignoredMetadata[objectKey].includes(itemKey)) {
+                            if (FileChecker.isExists(metadataItem.path)) {
+                                FileWriter.delete(metadataItem.path);
+                            }
+                            let metaFile = metadataItem.path + '-meta.xml';
+                            if (FileChecker.isExists(metaFile)) {
                                 FileWriter.delete(metaFile);
+                            }
                         }
                     });
                 }
@@ -893,9 +931,9 @@ function ignoreFileMetadataFromFolders(metadataType, ignoredMetadata) {
     }
 }
 
-function ignoreFileMetadataFromFiles(metadataType, ignoredMetadata, compress, sortOrder) {
+function ignoreFileMetadataFromFiles(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, compress: boolean, sortOrder: string): void {
     let typeData = TYPES_XML_RELATION[metadataType.name];
-    Object.keys(metadataType.childs).forEach(function (objectKey) {
+    Object.keys(metadataType.childs).forEach((objectKey) => {
         if (ignoredMetadata[objectKey] || ignoredMetadata['*']) {
             let path = metadataType.path + '/' + objectKey + '.' + metadataType.suffix + '-meta.xml';
             if (FileChecker.isExists(path)) {
@@ -930,25 +968,28 @@ function ignoreFileMetadataFromFiles(metadataType, ignoredMetadata, compress, so
     });
 }
 
-function ignoreFileRules(metadataType, ignoredMetadata, singularType, compress, sortOrder) {
+function ignoreFileRules(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, singularType: MetadataType, compress: boolean, sortOrder: string): void {
     let typeData = TYPES_XML_RELATION[metadataType.name];
     if (ignoredMetadata['*']) {
-        if (FileChecker.isExists(metadataType.path))
+        if (metadataType.path && FileChecker.isExists(metadataType.path)){
             FileWriter.delete(metadataType.path);
+        }
     } else {
         if (singularType) {
-            Object.keys(singularType.childs).forEach(function (objectKey) {
-                if (ignoredMetadata[objectKey]) {
-                    if (ignoredMetadata[objectKey].includes('*')) {
-                        if (FileChecker.isExists(singularType.childs[objectKey].path))
-                            FileWriter.delete(singularType.childs[objectKey].path);
+            Object.keys(singularType.childs).forEach((objectKey) => {
+                const metadataObject = singularType.getChild(objectKey);
+                if (metadataObject && ignoredMetadata[objectKey]) {
+                    if (metadataObject.path && ignoredMetadata[objectKey].includes('*')) {
+                        if (FileChecker.isExists(metadataObject.path)){
+                            FileWriter.delete(metadataObject.path);
+                        }
                     } else {
                         let path = metadataType.path + '/' + objectKey + '.' + metadataType.suffix + '-meta.xml';
                         if (FileChecker.isExists(path)) {
                             let xmlRoot = XMLParser.parseXML(FileReader.readFileSync(path), false);
-                            let dataToKeep = [];
-                            let dataToRemove = [];
-                            Object.keys(singularType.childs[objectKey].childs).forEach(function (itemKey) {
+                            let dataToKeep: any[] = [];
+                            let dataToRemove: any[] = [];
+                            Object.keys(singularType.childs[objectKey].childs).forEach((_itemKey) => {
                                 if (xmlRoot[metadataType.name] && xmlRoot[metadataType.name][typeData.collection]) {
                                     xmlRoot[metadataType.name][typeData.collection] = Utils.forceArray(xmlRoot[metadataType.name][typeData.collection]);
                                     for (let xmlElement of xmlRoot[metadataType.name][typeData.collection]) {
@@ -979,14 +1020,15 @@ function ignoreFileRules(metadataType, ignoredMetadata, singularType, compress, 
     }
 }
 
-function ignoreFileCustomLabels(metadataType, ignoredMetadata, compress, sortOrder) {
+function ignoreFileCustomLabels(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, compress: boolean, sortOrder: string): void {
     let typeData = TYPES_XML_RELATION[metadataType.name];
     if (ignoredMetadata['*']) {
-        if (FileChecker.isExists(metadataType.path))
+        if (metadataType.path && FileChecker.isExists(metadataType.path)){
             FileWriter.delete(metadataType.path);
+        }
     } else {
         let path = metadataType.childs[metadataType.name].path;
-        if (FileChecker.isExists(path)) {
+        if (path && FileChecker.isExists(path)) {
             let xmlRoot = XMLParser.parseXML(FileReader.readFileSync(path), false);
             if (xmlRoot[metadataType.name] && xmlRoot[metadataType.name][typeData.collection]) {
                 let dataToKeep = [];
