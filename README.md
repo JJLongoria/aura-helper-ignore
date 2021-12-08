@@ -43,23 +43,23 @@ The fields that start with _ are for internal use only (Does not modify this fie
 
 ### [**ignoreFile**](#ignore-fields-ignorefile)
 Path to the ignore file
-- `String`
+- `string`
 
 ### [**typesToIgnore**](#ignore-fields-typestoignore)
 List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
-- `Array<String>`
+- `string` | `{ [key:string]: MetadataType }`
 
 ### [**remove**](#ignore-fields-remove)
 True to remove ignored elements from the result object, false only for unselect elements 
-- `Boolean`
+- `boolean`
 
 ### [**compress**](#ignore-fields-compress)
 True to compress the XML Files, false in otherwise
-- `Boolean`
+- `boolean`
 
 ### [**sortOrder**](#ignore-fields-sortorder)
 Sort order to order the XML elements. Values: simpleFirst, complexFirst, alphabetAsc or alphabetDesc. (alphabetDesc by default)
-- `Boolean`
+- `boolean`
 
 </br>
 
@@ -70,7 +70,7 @@ Constructor to instance a new Ignore object. All parameters are optional and you
 
 ### **Parameters:**
   - **ignorefile**: Path to the ignore file
-    - `String`
+    - `string`
 
 </br>
 
@@ -144,7 +144,7 @@ Return the ignore object instance
 ### **Examples:**
 **Handle progress with on Start Process Type Event**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const ignore = new Ignore();
     ignore.onStartProcessType((metadataTypeAPIName) => {
         console.log(metadataTypeAPIName);
@@ -166,7 +166,7 @@ Return the ignore object instance
 ### **Examples:**
 **Handle progress with on End Process Type Event**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const ignore = new Ignore();
     ignore.onEndProcessType((metadataTypeAPIName) => {
         console.log(metadataTypeAPIName);
@@ -179,7 +179,7 @@ Method to set the ignore file to ignore the metadata types
 
 ### **Parameters:**
   - **ignorefile**: Path to the ignore file
-    - `String`
+    - `string`
 
 ### **Return:**
 Return the ignore object instance
@@ -188,7 +188,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set the ignore file**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const ignore = new Ignore();
     ignore.setIgnoreFile('path/to/the/ignore/file.json');
 ```
@@ -199,7 +199,7 @@ Method to set the Metadata Name or Names to ignore
 
 ### **Parameters:**
   - **typesToIgnore**: List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
-    - `Array<String>`
+    - `string[]`
 
 ### **Return:**
 Return the ignore object instance
@@ -208,7 +208,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set the types to ignore**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const ignore = new Ignore();
     ignore.setTypesToIgnore(['CustomObject', 'CustomField', 'CustomTab']);
 ```
@@ -219,7 +219,7 @@ Method to set if remove metadata from Metadata Object or only unselect it
 
 ### **Parameters:**
   - **remove**: True to remove ignored elements from the result object, false only for unselect elements. If undefined or not pass parameter, also set to true 
-    - `Boolean`
+    - `boolean`
 
 ### **Return:**
 Return the ignore object instance
@@ -228,7 +228,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set remove data from Metadata Object result**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const ignore = new Ignore();
     ignore.removeData(true);
 ```
@@ -239,7 +239,7 @@ True to compress the XML Files, false in otherwise. If undefined or not pass par
 
 ### **Parameters:**
   - **compress**: True to compress the XML Files, false in otherwise
-    - `Boolean`
+    - `boolean`
 
 ### **Return:**
 Return the ignore object instance
@@ -248,7 +248,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set compress affected XML Files**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const ignore = new Ignore();
     ignore.setCompress(true);
 ```
@@ -259,7 +259,7 @@ Method to set the sort order value to sort the XML Elements when compress
 
 ### **Parameters:**
   - **sortOrder**: Sort order to order the XML elements. Values: simpleFirst, complexFirst, alphabetAsc or alphabetDesc. (alphabetDesc by default).
-    - `String`
+    - `string`
 
 ### **Return:**
 Return the ignore object instance
@@ -268,8 +268,8 @@ Return the ignore object instance
 ### **Examples:**
 **Set Sort order to order XML Elements**
 ```javascript
-    const XMLCompressor = require('@aurahelper/xml-compressor');
-    const Ignore = require('@aurahelper/ignore');
+    import { XMLCompressor } from '@aurahelper/xml-compressor';
+    import { Ignore } from '@aurahelper/ignore';
     
     const sortOrder = XMLCompressor.getSortOrderValues();
     const ignore = new Ignore();
@@ -288,7 +288,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set Simple first sort order to order XML Elements**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
 
     const ignore = new Ignore();    
     ignore.setIgnoreFile('path/to/the/ignore/file.json').sortSimpleFirst();
@@ -306,7 +306,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set Complex first sort order to order XML Elements**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
 
     const ignore = new Ignore();    
     ignore.setIgnoreFile('path/to/the/ignore/file.json').sortComplexFirst();
@@ -324,7 +324,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set Alphabet asc sort order to order XML Elements**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
 
     const ignore = new Ignore();    
     ignore.setIgnoreFile('path/to/the/ignore/file.json').sortAlphabetAsc();
@@ -342,7 +342,7 @@ Return the ignore object instance
 ### **Examples:**
 **Set Alphabet desc sort order to order XML Elements**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
 
     const ignore = new Ignore();    
     ignore.setIgnoreFile('path/to/the/ignore/file.json').sortAlphabetDesc();
@@ -354,11 +354,11 @@ Method to ignore Metadata types from a Metadata JSON Object or Metadata JSON fil
 
 ### **Parameters:**
   - **metadataOrPath**: Metadata JSON Object or Metadata JSON file path
-    - `String` | `Object`
+    - `string` | `{ [key: string]: MetadataType }`
 
 ### **Return:**
 Return a Metadata JSON Object with the ignored metadata unselected or removed
-- `Object`
+- `{ [key: string]: MetadataType }`
 
 ### **Throws:**
 This method can throw the next exceptions:
@@ -371,7 +371,7 @@ This method can throw the next exceptions:
 ### **Examples:**
 **Ignore Metadata from Metadata JSON Object**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
     const metadataObjects = {
         CustomObject: {
             name: 'CustomObject',
@@ -412,7 +412,7 @@ This method can throw the next exceptions:
 ```
 **Ignore Specified Metadata from Metadata JSON File**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
 
     const typesForIgnore = ['CustomObject'];
     const metadataPath = 'path/to/json/file';
@@ -424,7 +424,7 @@ This method can throw the next exceptions:
 ```
 **Ignore Metadata and Remove from Metadata JSON File**
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
+    import { Ignore } from '@aurahelper/ignore';
 
     const remove = true;
     const metadataPath = 'path/to/json/file';
@@ -442,9 +442,9 @@ Method to ignore Metadata types from your local project. This method can delete 
 
 ### **Parameters:**
   - **projectPath**: Salesforce Project root path
-    - `String`
+    - `string`
   - **metadataDetails**: Metadata details list
-    - `Array<MetadataDetail>`
+    - `MetadataDetail[]`
 
 ### **Throws:**
 This method can throw the next exceptions:
@@ -463,10 +463,9 @@ This method can throw the next exceptions:
 This option can remove entire file or folders from your project, or remove some metadata into your files like some custom labels from the custom labels file, or workflow alerts from your Account workflow file for example. For this operation, also need a Metadata Details from your salesforce project. You can get it with [@ah/connector](https://github.com/JJLongoria/aura-helper-connector) from your org using the listMetadataTypes() method. Also allow to you to compress files with the [@aurahelper/xml-compressor](https://github.com/JJLongoria/aura-helper-xml-compressor)
 
 ```javascript
-    const Ignore = require('@aurahelper/ignore');
-    const Connection = require('@ah/connector');
-    const { SORT_ORDER } = require('@aurahelper/xml-compressor');
-    
+    import { Ignore } from '@aurahelper/ignore';
+    import { XMLCompressor, SORT_ORDER } from '@aurahelper/xml-compressor';
+    import { Connection } from '@aurahelper/connector';
     // Get Metadata Details from your org using @ah/connector
     const connection = new Connection('MyOrg', '50');
     connection.setUsernameOrAlias('MyOrg');
