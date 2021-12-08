@@ -141,8 +141,8 @@ export class Ignore {
      * Constructor to instance a new Ignore object
      * @param {string} [ignoreFile] Path to the ignore file
      */
-    constructor(ignoreFile: string) {
-        this.ignoreFile = ignoreFile;
+    constructor(ignoreFile?: string) {
+        this.ignoreFile = ignoreFile || './.ahignore.json';
         this.typesToIgnore = undefined;
         this.remove = false;
         this.compress = false;
