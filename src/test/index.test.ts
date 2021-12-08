@@ -8,28 +8,28 @@ describe('Testing ./index.js', () => {
         try {
             new Ignore('./src/test/assets/.ahignores.json').ignoreMetadata('./src/test/assets/.ahignores.json');
         } catch (error) {
-            expect(error.message).toMatch('does not exists or not have access to it')
+            expect(error.message).toMatch('does not exists or not have access to it');
         }
         try {
             new Ignore('./src/test/assets/package.xml').ignoreMetadata('./src/test/assets/package.xml');
         } catch (error) {
-            expect(error.message).toMatch('does not have a valid JSON content')
+            expect(error.message).toMatch('does not have a valid JSON content');
         }
         let metadata = MetadataFactory.createMetadataTypesFromPackageXML('./src/test/assets/package.xml');
         try {
             new Ignore('./src/test/assets/package.xml').ignoreMetadata('./src/test/assets/metadataTypes.xml');
         } catch (error) {
-            expect(error.message).toMatch('Wrong JSON Format')
+            expect(error.message).toMatch('Wrong JSON Format');
         }
         try {
             new Ignore('./src/test/assets/.ahignores.json').ignoreMetadata(metadata);
         } catch (error) {
-            expect(error.message).toMatch('does not exists or not have access to it')
+            expect(error.message).toMatch('does not exists or not have access to it');
         }
         try {
             new Ignore('./src/test/assets/package.xml').ignoreMetadata(metadata);
         } catch (error) {
-            expect(error.message).toMatch('does not have a valid JSON content')
+            expect(error.message).toMatch('does not have a valid JSON content');
         }
         // Terting ignore without * without remove
         let result = new Ignore('./src/test/assets/.ahignore.json').ignoreMetadata(metadata);
@@ -150,23 +150,23 @@ describe('Testing ./index.js', () => {
         try {
             new Ignore('./src/test/assets/.ahignores.json').ignoreProjectMetadata('./src/test/assets/SFDXProjects', metadataDetails);
         } catch (error) {
-            expect(error.message).toMatch('does not exists or not have access to it')
+            expect(error.message).toMatch('does not exists or not have access to it');
         }
         try {
             new Ignore('./src/test/assets/package.xml').ignoreProjectMetadata('./src/test/assets/package.xml', metadataDetails);
         } catch (error) {
-            expect(error.message).toMatch('is not a valid directory path')
+            expect(error.message).toMatch('is not a valid directory path');
         }
         try {
             const ignore = new Ignore('./src/test/assets/.ahignores.json');
             ignore.ignoreProjectMetadata('./src/test/assets/SFDXProject', metadataDetails);
         } catch (error) {
-            expect(error.message).toMatch('does not exists or not have access to it')
+            expect(error.message).toMatch('does not exists or not have access to it');
         }
         try {
             new Ignore('./src/test/assets/package.xml').ignoreProjectMetadata('./src/test/assets/SFDXProject', metadataDetails);
         } catch (error) {
-            expect(error.message).toMatch('does not have a valid JSON content')
+            expect(error.message).toMatch('does not have a valid JSON content');
         }
         FileWriter.copyFolderSync('./src/test/assets/SFDXProject', './src/test/assets/SFDXProjectCopy', true);
         new Ignore('./src/test/assets/.ahignore.json').ignoreProjectMetadata('./src/test/assets/SFDXProjectCopy', metadataDetails);

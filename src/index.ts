@@ -119,7 +119,7 @@ const METADATA_WITH_CHILDS: { [key: string]: any } = {
 const EVENTS: { [key: string]: string } = {
     START_TYPE: 'startType',
     END_TYPE: 'endType',
-}
+};
 
 /**
  * Class to ignore metadata from your salesforce projects or from a JSON metadata object. 
@@ -275,14 +275,15 @@ export class Ignore {
      * @throws {WrongFormatException} If metadata file path or ignore file is not a JSON file or Metadata Object are wrong
      */
     ignoreMetadata(metadataOrPath: string | { [key: string]: MetadataType }): { [key: string]: MetadataType } {
-        metadataOrPath = Validator.validateMetadataJSON(metadataOrPath)
+        metadataOrPath = Validator.validateMetadataJSON(metadataOrPath);
         const metadata = Utils.clone(metadataOrPath);
         const ignoredMetadata = createIgnoreMetadataMap(Validator.validateJSONFile(this.ignoreFile, 'Ignore'));
         for (const metadataTypeName of Object.keys(ignoredMetadata)) {
             const typeData = TYPES_XML_RELATION[metadataTypeName];
             if (metadata[metadataTypeName] || (typeData && typeData.singularName)) {
-                if (this.typesToIgnore && !this.typesToIgnore.includes(metadataTypeName))
+                if (this.typesToIgnore && !this.typesToIgnore.includes(metadataTypeName)) {
                     continue;
+                }
                 this._event.emit(EVENTS.START_TYPE, metadataTypeName);
                 switch (metadataTypeName) {
                     case MetadataTypes.CUSTOM_LABELS:
@@ -292,8 +293,9 @@ export class Ignore {
                     case MetadataTypes.ASSIGNMENT_RULES:
                     case MetadataTypes.AUTORESPONSE_RULES:
                     case MetadataTypes.ESCALATION_RULES:
-                        if (metadata[typeData.singularName])
+                        if (metadata[typeData.singularName]) {
                             ignoreMetadataRules(metadata[metadataTypeName], ignoredMetadata[metadataTypeName], metadata[typeData.singularName], this.remove);
+                        }
                         break;
                     case MetadataTypes.SHARING_CRITERIA_RULE:
                     case MetadataTypes.SHARING_OWNER_RULE:
@@ -354,20 +356,23 @@ export class Ignore {
         for (const metadataTypeName of Object.keys(ignoredMetadata)) {
             let typeData = TYPES_XML_RELATION[metadataTypeName];
             if (metadataFromFileSystem[metadataTypeName] || (typeData && typeData.singularName)) {
-                if (this.typesToIgnore && !this.typesToIgnore.includes(metadataTypeName))
+                if (this.typesToIgnore && !this.typesToIgnore.includes(metadataTypeName)) {
                     continue;
+                }
                 this._event.emit(EVENTS.START_TYPE, metadataTypeName);
                 switch (metadataTypeName) {
                     case MetadataTypes.CUSTOM_LABELS:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreFileCustomLabels(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName], this.compress, this.sortOrder);
+                        }
                         break;
                     case MetadataTypes.MATCHING_RULES:
                     case MetadataTypes.ASSIGNMENT_RULES:
                     case MetadataTypes.AUTORESPONSE_RULES:
                     case MetadataTypes.ESCALATION_RULES:
-                        if (metadataFromFileSystem[typeData.singularName])
+                        if (metadataFromFileSystem[typeData.singularName]) {
                             ignoreFileRules(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName], metadataFromFileSystem[typeData.singularName], this.compress, this.sortOrder);
+                        }
                         break;
                     case MetadataTypes.SHARING_CRITERIA_RULE:
                     case MetadataTypes.SHARING_OWNER_RULE:
@@ -379,12 +384,14 @@ export class Ignore {
                     case MetadataTypes.WORKFLOW_RULE:
                     case MetadataTypes.WORKFLOW_TASK:
                     case MetadataTypes.WORKFLOW_OUTBOUND_MESSAGE:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreFileMetadataFromFiles(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName], this.compress, this.sortOrder);
+                        }
                         break;
                     case MetadataTypes.CUSTOM_OBJECT:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreFileCustomObjects(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName]);
+                        }
                         break;
                     case MetadataTypes.CUSTOM_FIELD:
                     case MetadataTypes.INDEX:
@@ -396,24 +403,28 @@ export class Ignore {
                     case MetadataTypes.SHARING_REASON:
                     case MetadataTypes.LISTVIEW:
                     case MetadataTypes.FIELD_SET:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreFileFromCustomObjects(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName]);
+                        }
                         break;
                     case MetadataTypes.EMAIL_TEMPLATE:
                     case MetadataTypes.REPORT:
                     case MetadataTypes.DASHBOARD:
                     case MetadataTypes.DOCUMENT:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreFileMetadataFromFolders(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName]);
+                        }
                         break;
                     case MetadataTypes.PROFILE:
                     case MetadataTypes.PERMISSION_SET:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreFromPermissionFiles(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName], this.compress, this.sortOrder);
+                        }
                         break;
                     default:
-                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName])
+                        if (metadataFromFileSystem[metadataTypeName] && ignoredMetadata[metadataTypeName]) {
                             ignoreMetadataFiles(metadataFromFileSystem[metadataTypeName], ignoredMetadata[metadataTypeName]);
+                        }
                         break;
                 }
                 this._event.emit(EVENTS.END_TYPE, metadataTypeName);
@@ -438,14 +449,17 @@ function createIgnoreTypeMap(objectsForIgnore: string[]): { [key: string]: any }
         if (objectToIgnore.indexOf(':') !== -1) {
             let splits = objectToIgnore.split(':');
             if (splits.length === 2) {
-                if (!objectToIgnoreMap[splits[0]])
+                if (!objectToIgnoreMap[splits[0]]) {
                     objectToIgnoreMap[splits[0]] = [];
+                }
                 objectToIgnoreMap[splits[0]].push(splits[1]);
             } else if (splits.length === 3 && splits[0].toLowerCase() === 'userpermission') {
-                if (!objectToIgnoreMap['userpermission'])
+                if (!objectToIgnoreMap['userpermission']) {
                     objectToIgnoreMap['userpermission'] = {};
-                if (!objectToIgnoreMap['userpermission'][splits[1]])
+                }
+                if (!objectToIgnoreMap['userpermission'][splits[1]]) {
                     objectToIgnoreMap['userpermission'][splits[1]] = [];
+                }
                 objectToIgnoreMap['userpermission'][splits[1]].push(splits[2]);
             }
         } else {
@@ -501,10 +515,11 @@ function ignoreMetadataRules(metadataType: MetadataType, ignoredMetadata: { [key
         if (metadataType) {
             metadataType.checked = false;
             Object.keys(metadataType.childs).forEach((objectKey) => {
-                if (remove)
+                if (remove) {
                     delete metadataType.childs[objectKey];
-                else
+                } else {
                     metadataType.childs[objectKey].checked = false;
+                }
             });
         }
     }
@@ -524,8 +539,9 @@ function ignoreMetadataRules(metadataType: MetadataType, ignoredMetadata: { [key
                         dataToRemove.push(objectKey + ':' + itemKey);
                     }
                 });
-                if (remove && singularType.childs[objectKey] && Object.keys(singularType.childs[objectKey].childs).length === 0)
+                if (remove && singularType.childs[objectKey] && Object.keys(singularType.childs[objectKey].childs).length === 0) {
                     delete singularType.childs[objectKey];
+                }
             } else if (ignoredMetadata['*'] || (ignoredMetadata[objectKey] && ignoredMetadata[objectKey].includes('*'))) {
                 if (remove) {
                     delete singularType.childs[objectKey];
@@ -538,10 +554,11 @@ function ignoreMetadataRules(metadataType: MetadataType, ignoredMetadata: { [key
         if (dataToRemove.length > 0) {
             if (metadataType) {
                 Object.keys(metadataType.childs).forEach((objectKey) => {
-                    if (remove)
+                    if (remove) {
                         delete metadataType.childs[objectKey];
-                    else
+                    } else {
                         metadataType.childs[objectKey].checked = false;
+                    }
                 });
             }
         }
@@ -552,10 +569,11 @@ function ignoreMetadataWithChilds(metadataType: MetadataType, ignoredMetadata: {
     if (METADATA_WITH_CHILDS[metadataType.name]) {
         if (ignoredMetadata['*']) {
             Object.keys(metadataType.childs).forEach((objectKey) => {
-                if (remove)
+                if (remove) {
                     delete metadataType.childs[objectKey];
-                else
+                } else {
                     metadataType.childs[objectKey].checked = false;
+                }
             });
             for (let childType of METADATA_WITH_CHILDS[metadataType.name]) {
                 if (allTypes[childType]) {
@@ -730,8 +748,9 @@ function ignoreOtherMetadataTypes(metadataType: MetadataType, ignoredMetadata: {
                     if (remove && (!metadataType.childs[objectKey].childs || Object.keys(metadataType.childs[objectKey].childs).length === 0)) {
                         delete metadataType.childs[objectKey];
                     } else {
-                        if (!metadataType.childs[objectKey].childs || Object.keys(metadataType.childs[objectKey].childs).length === 0)
+                        if (!metadataType.childs[objectKey].childs || Object.keys(metadataType.childs[objectKey].childs).length === 0) {
                             metadataType.childs[objectKey].checked = false;
+                        }
                         Object.keys(metadataType.childs[objectKey].childs).forEach((itemKey) => {
                             if (ignoredMetadata[objectKey] && (ignoredMetadata[objectKey].includes(itemKey) || ignoredMetadata[objectKey].includes('*'))) {
                                 if (remove) {
@@ -885,8 +904,9 @@ function ignoreMetadataFiles(metadataType: MetadataType, ignoredMetadata: { [key
                                 FileWriter.delete(metadataObject.path);
                             }
                             let metaFile = metadataObject.path + '-meta.xml';
-                            if (FileChecker.isExists(metaFile))
+                            if (FileChecker.isExists(metaFile)) {
                                 FileWriter.delete(metaFile);
+                            }
                         }
                     }
                 }
@@ -946,7 +966,7 @@ function ignoreFileMetadataFromFiles(metadataType: MetadataType, ignoredMetadata
                         let dataToRemove = [];
                         let dataToKeep = [];
                         for (let xmlElement of xmlRoot[typeData.parentName][typeData.collection]) {
-                            let elementKey = xmlElement[typeData.fieldKey]
+                            let elementKey = xmlElement[typeData.fieldKey];
                             if (ignoredMetadata[objectKey].includes(elementKey)) {
                                 dataToRemove.push(xmlElement);
                             } else {
@@ -971,7 +991,7 @@ function ignoreFileMetadataFromFiles(metadataType: MetadataType, ignoredMetadata
 function ignoreFileRules(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, singularType: MetadataType, compress: boolean, sortOrder: string): void {
     let typeData = TYPES_XML_RELATION[metadataType.name];
     if (ignoredMetadata['*']) {
-        if (metadataType.path && FileChecker.isExists(metadataType.path)){
+        if (metadataType.path && FileChecker.isExists(metadataType.path)) {
             FileWriter.delete(metadataType.path);
         }
     } else {
@@ -980,7 +1000,7 @@ function ignoreFileRules(metadataType: MetadataType, ignoredMetadata: { [key: st
                 const metadataObject = singularType.getChild(objectKey);
                 if (metadataObject && ignoredMetadata[objectKey]) {
                     if (metadataObject.path && ignoredMetadata[objectKey].includes('*')) {
-                        if (FileChecker.isExists(metadataObject.path)){
+                        if (FileChecker.isExists(metadataObject.path)) {
                             FileWriter.delete(metadataObject.path);
                         }
                     } else {
@@ -1023,7 +1043,7 @@ function ignoreFileRules(metadataType: MetadataType, ignoredMetadata: { [key: st
 function ignoreFileCustomLabels(metadataType: MetadataType, ignoredMetadata: { [key: string]: any }, compress: boolean, sortOrder: string): void {
     let typeData = TYPES_XML_RELATION[metadataType.name];
     if (ignoredMetadata['*']) {
-        if (metadataType.path && FileChecker.isExists(metadataType.path)){
+        if (metadataType.path && FileChecker.isExists(metadataType.path)) {
             FileWriter.delete(metadataType.path);
         }
     } else {
@@ -1035,7 +1055,7 @@ function ignoreFileCustomLabels(metadataType: MetadataType, ignoredMetadata: { [
                 let dataToRemove = [];
                 xmlRoot[metadataType.name][typeData.collection] = Utils.forceArray(xmlRoot[metadataType.name][typeData.collection]);
                 for (let xmlElement of xmlRoot[metadataType.name][typeData.collection]) {
-                    let elementKey = xmlElement[typeData.fieldKey]
+                    let elementKey = xmlElement[typeData.fieldKey];
                     if (ignoredMetadata[elementKey] && ignoredMetadata[elementKey].includes(elementKey)) {
                         dataToRemove.push(xmlElement);
                     } else {
