@@ -185,11 +185,11 @@ export class Ignore {
 
     /**
      * Method to set the Metadata Name or Names to ignore
-     * @param {string | string[]} typesToIgnore Metadata type API Name or List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
+     * @param {string | string[]} [typesToIgnore] Metadata type API Name or List with the Metadata Type API Names to ignore. This parameter is used to ignore only the specified metadata (also must be in ignore file) and avoid ignore all metadata types specified on the file.
      * 
      * @returns {Ignore} Return the ignore object instance
      */
-    setTypesToIgnore(typesToIgnore: string | string[]): Ignore {
+    setTypesToIgnore(typesToIgnore?: string | string[]): Ignore {
         this.typesToIgnore = Utils.forceArray(typesToIgnore) as string[];
         return this;
     }
