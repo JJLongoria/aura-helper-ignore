@@ -63,9 +63,9 @@
     "typescript": "^3.9.6"
   },
   "dependencies": {
-    "@aurahelper/core": "file:../ah-core",
-    "@aurahelper/languages": "file:../ah-languages",
-    "@aurahelper/metadata-factory": "file:../ah-metadata-factory",
-    "@aurahelper/xml-compressor": "file:../ah-xml-compressor"
+    "@aurahelper/core": "^2.0.0",
+    "@aurahelper/languages": "^2.0.0",
+    "@aurahelper/metadata-factory": "^2.0.0",
+    "@aurahelper/xml-compressor": "^2.0.0"
   }
 }
